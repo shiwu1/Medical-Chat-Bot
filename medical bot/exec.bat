@@ -1,0 +1,1 @@
+python demo.py --model_name_or_path  ./medical_model/ --template chatglm3
