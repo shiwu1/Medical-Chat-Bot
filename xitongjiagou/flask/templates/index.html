@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Assistant</title>
+    <style>
+        .chat-container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-y: scroll;
+            height: 400px;
+        }
+        .message {
+            margin-bottom: 10px;
+        }
+        .user-message {
+            text-align: right;
+            color: blue;
+        }
+        .assistant-message {
+            text-align: left;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container" id="chat-container">
+        <!-- Messages will be dynamically added here -->
+    </div>
+    <form id="message-form">
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button type="submit">Send</button>
+        <button type="button" id="clear-history">Clear History</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('message-form');
+        const userInput = document.getElementById('user-input');
+        const chatContainer = document.getElementById('chat-container');
+        const clearHistoryButton = document.getElementById('clear-history');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            sendMessage(userInput.value);
+            userInput.value = '';
+        });
+
+        clearHistoryButton.addEventListener('click', function() {
+            clearHistory();
+        });
+
+        function sendMessage(message) {
+            const formData = new FormData();
+            formData.append('user_message', message);
+
+            fetch('/send_message', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayMessage(message, 'user');
+                displayMessage(data.response, 'assistant');
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function clearHistory() {
+            fetch('/clear_history', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatContainer.innerHTML = '';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function displayMessage(message, role) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', role + '-message');
+            messageElement.innerText = message;
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
